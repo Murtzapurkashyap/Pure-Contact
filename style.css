@@ -1,0 +1,46 @@
+button {
+    font-size: 16px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    margin-right: 10px;
+    border-radius: 10px; /* Added to make buttons rounded */
+}
+
+.format-btn {
+    background-color: red;
+}
+
+.copy-btn {
+    background-color: green;
+}
+
+.export-excel-btn {
+    background-color: blue;
+}
+
+.export-csv-btn {
+    background-color: yellow;
+    color: black;
+}
+
+.vcard-btn {
+    background-color: purple;
+}
+
+.subscribe-btn {
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    border-radius: 10px; /* Updated to match other buttons */
+}
+
+.subscribe-btn img {
+    margin-right: 10px;
+    width: 20px;
+}
