@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vCard Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            font-size: 30px;
+        }
+        .contact-list {
+            margin-top: 20px;
+        }
+        .contact-item {
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+        }
+        .contact-item:hover {
+            background-color: #f0f0f0;
+        }
+        .contact-detail {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .upload-btn {
+            display: inline-block;
+            background-color: lightblue;
+            color: black;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .upload-btn.uploaded {
+            background-color: darkblue;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>vCard Viewer Tool</h1>
+
+    <input type="file" id="fileInput" accept=".vcf" />
+    <button class="upload-btn" id="uploadButton">Upload and Check</button>
+
+    <div class="contact-list" id="contactList"></div>
+    <div class="contact-detail" id="contactDetail"></div>
+
+    <div class="fab" onclick="openHomePage()">+</div>
+
+    <script>
+        document.getElementById('uploadButton').addEventListener('click', function () {
+            let fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert('Please upload a vCard file.');
+                return;
+            }
+
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                let content = e.target.result;
+                let contacts = parseVCard(content);
+                displayContacts(contacts);
+            };
+            reader.readAsText(file);
+            this.classList.add('uploaded');
+        });
+
+        function parseVCard(vCardContent) {
+            let contacts = [];
+            let vCards = vCardContent.split('END:VCARD');
+
+            for (let vCard of vCards) {
+                if (vCard.trim()) {
+                    let lines = vCard.split('\n');
+                    let contact = {};
+                    lines.forEach(line => {
+                        if (line.startsWith('FN:')) {
+                            contact.name = line.substring(3);
+                        } else if (line.startsWith('TEL;TYPE=CELL:')) {
+                            contact.phone = line.substring(15);
+                        }
+                    });
+                    if (contact.name && contact.phone) {
+                        contacts.push(contact);
+                    }
+                }
+            }
+            return contacts;
+        }
+
+        function displayContacts(contacts) {
+            let contactList = document.getElementById('contactList');
+            let contactDetail = document.getElementById('contactDetail');
+
+            contactList.innerHTML = '';
+            contactDetail.innerHTML = '';
+
+            contacts.forEach((contact, index) => {
+                let contactElement = document.createElement('div');
+                contactElement.className = 'contact-item';
+                contactElement.textContent = `${contact.name} ${contact.phone}`;
+                contactElement.onclick = function () {
+                    contactDetail.innerHTML = `<strong>${contact.name}</strong><br>${contact.phone}`;
+                };
+                contactList.appendChild(contactElement);
+            });
+        }
+
+        function openHomePage() {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+</body>
+</html>

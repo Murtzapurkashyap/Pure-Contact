@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Number Formatter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 30px;
+        }
+        h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .input-container {
+            margin-bottom: 10px;
+        }
+        .input-container label {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .input-container input {
+            font-size: 16px;
+            padding: 5px;
+        }
+        .button-container {
+            margin-bottom: 20px;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            margin-right: 10px;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+        .format-btn {
+            background-color: red;
+        }
+        .copy-btn {
+            background-color: green;
+        }
+        .export-excel-btn {
+            background-color: blue;
+        }
+        .export-csv-btn {
+            background-color: yellow;
+            color: black;
+        }
+        .vcard-btn {
+            background-color: purple;
+        }
+        .subscribe-btn {
+            background-color: red;
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .subscribe-btn img {
+            margin-right: 10px;
+            width: 20px;
+        }
+        .output {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+        }
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Created By: Sanjeev Kashyap</h1>
+    <h2>Email: freehelp05@gmail.com</h2>
+    <a href="https://youtube.com/@techntricksyoutuber?si=7xwAaJ08v-HFftV7" class="subscribe-btn">
+        Subscribe
+    </a>
+
+    <h2>Phone Number Formatter</h2>
+
+    <p>Paste your phone numbers below:</p>
+    <textarea id="numbersInput" placeholder="+91 70003 78528, +91 761 030 1424"></textarea>
+
+    <div class="input-container">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" placeholder="MLM">
+    </div>
+
+    <div class="input-container">
+        <label for="lastName">Last Name (Prefix):</label>
+        <input type="text" id="lastName" placeholder="1">
+    </div>
+
+    <div class="button-container">
+        <button class="format-btn" onclick="formatNumbers()">Format Numbers</button>
+        <button class="copy-btn" onclick="copyNumbers()">Copy All</button>
+        <button class="export-excel-btn" onclick="exportToExcel()">Export Excel File</button>
+        <button class="export-csv-btn" onclick="exportToCSV()">Export CSV</button>
+        <button class="vcard-btn" onclick="exportToVCard()">Export vCard</button>
+    </div>
+
+    <div class="output" id="formattedNumbers"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        function formatNumbers() {
+            let numbers = document.getElementById('numbersInput').value.split(',');
+            let uniqueNumbers = new Set();
+            const validNumberRegex = /^\+\d+$/;
+
+            for (let number of numbers) {
+                let formattedNumber = number.replace(/\s+/g, '');
+                if (validNumberRegex.test(formattedNumber)) {
+                    uniqueNumbers.add(formattedNumber);
+                }
+            }
+
+            let formattedNumbers = Array.from(uniqueNumbers).sort();
+            let output = '<ul>';
+            for (let num of formattedNumbers) {
+                output += `<li>${num}</li>`;
+            }
+            output += '</ul>';
+
+            document.getElementById('formattedNumbers').innerHTML = output;
+        }
+
+        function copyNumbers() {
+            let formattedNumbers = document.getElementById('formattedNumbers').innerText;
+            navigator.clipboard.writeText(formattedNumbers).then(() => {
+                alert("Formatted numbers copied to clipboard!");
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        function exportToExcel() {
+            let formattedNumbers = document.getElementById('formattedNumbers').innerText.split('\n').filter(Boolean);
+            let firstName = document.getElementById('firstName').value || "MLM";
+            let lastNamePrefix = document.getElementById('lastName').value || "1";
+
+            let data = [
+                ["First name", "Last name", "Mobile"],
+            ];
+
+            formattedNumbers.forEach((number, index) => {
+                data.push([firstName, `${Number(lastNamePrefix) + index}`, number]);
+            });
+
+            let ws = XLSX.utils.aoa_to_sheet(data);
+            ws['!cols'] = [
+                { wch: 10 },
+                { wch: 10 },
+                { wch: 15 }
+            ];
+
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Numbers");
+
+            XLSX.writeFile(wb, "FormattedNumbers.xlsx");
+        }
+
+        function exportToCSV() {
+            let formattedNumbers = document.getElementById('formattedNumbers').innerText.split('\n').filter(Boolean);
+            let firstName = document.getElementById('firstName').value || "MLM";
+            let lastNamePrefix = document.getElementById('lastName').value || "1";
+
+            let data = [
+                ["First name", "Last name", "Mobile"],
+            ];
+
+            formattedNumbers.forEach((number, index) => {
+                data.push([firstName, `${Number(lastNamePrefix) + index}`, number]);
+            });
+
+            let csvContent = "data:text/csv;charset=utf-8," 
+                + data.map(e => e.join(",")).join("\n");
+
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "FormattedNumbers.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportToVCard() {
+            let formattedNumbers = document.getElementById('formattedNumbers').innerText.split('\n').filter(Boolean);
+            let firstName = document.getElementById('firstName').value || "MLM";
+            let lastNamePrefix = document.getElementById('lastName').value || "1";
+
+            let vCardContent = "";
+
+            formattedNumbers.forEach((number, index) => {
+                vCardContent += `BEGIN:VCARD\nVERSION:3.0\nN:${Number(lastNamePrefix) + index};${firstName};;\nFN:${firstName} ${Number(lastNamePrefix) + index}\nTEL;TYPE=CELL:${number}\nEND:VCARD\n`;
+            });
+
+            let blob = new Blob([vCardContent], { type: "text/vcard" });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Contacts.vcf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+
+    <div class="fab" onclick="openVCardViewer()">+</div>
+
+    <script>
+        function openVCardViewer() {
+            window.location.href = 'vcard-viewer.html';
+        }
+    </script>
+
+</body>
+</html>
